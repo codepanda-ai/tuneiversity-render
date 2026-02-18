@@ -1,9 +1,10 @@
 {
-  "name": "my-project",
+  "name": "tuneiversity",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "next-dev": "next dev --turbo",
+    "fastapi-dev": "uvicorn api.main:app --reload --port 8000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."
