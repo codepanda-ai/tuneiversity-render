@@ -1,0 +1,6 @@
+myenv/
+__pycache__/
+.ruff_cache/
+.env.local
+*.pyc
+*.pyo
