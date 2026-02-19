@@ -1,9 +1,10 @@
 import random
-from fastapi import FastAPI, File, UploadFile, Request as FastAPIRequest 
+from fastapi import FastAPI, File, UploadFile, Request as FastAPIRequest
 from typing import Any
 from vercel.headers import set_headers
 
 app = FastAPI(title="Tuneiversity API")
+
 
 @app.middleware("http")
 async def vercel_headers_middleware(request: FastAPIRequest, call_next):
@@ -19,6 +20,7 @@ async def vercel_headers_middleware(request: FastAPIRequest, call_next):
     """
     set_headers(dict(request.headers))
     return await call_next(request)
+
 
 MOCK_SONGS: list[dict[str, Any]] = [
     {
