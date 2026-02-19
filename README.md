@@ -1,19 +1,34 @@
-Tuneiversity - AI-powered Mandarin pronunciation tutor
+# Tuneiversity - AI-powered Mandarin pronunciation tutor
 
-Run frontend:
-cd frontend && pnpm dev
+Frontend (Next.js + Typescript)
+---
+Setup:
+1. `cd frontend`
+2. `pnpm install`
 
-Run backend:
-cd backend && uvicorn main:app --reload --port 8000
+Run: `pnpm dev`
 
-Docker:
+Lint: `pnpm lint` or `pnpm eslint . --fix`
 
-Verify frontend:
-docker build -t tuneiversity-frontend --build-arg API_URL=http://localhost:8000 ./frontend
+Backend (FastAPI + Python)
+---
+Setup:
+1. `cd backend`
+2. `python3 -m venv myenv`
+3. `source myenv/bin/activate`
+4. `pip install -r requirements.txt`
 
-Verify backend:
-docker build -t tuneiversity-backend ./backend
+Run: `uvicorn main:app --reload --port 8000`
 
-Verify full stack:
-docker compose up --build
-docker compose down
+Lint: `ruff check . --fix && ruff format .`
+
+Docker Deployment
+---
+
+Verify frontend: `docker build -t tuneiversity-frontend --build-arg API_URL=http://localhost:8000 ./frontend`
+
+Verify backend: `docker build -t tuneiversity-backend ./backend`
+
+Verify full stack: 
+1. `docker compose up --build`
+2. `docker compose down`
