@@ -6,12 +6,10 @@ from typing import Any
 
 app = FastAPI(title="Tuneiversity API")
 
-_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
-allowed_origins = [o.strip() for o in _raw.split(",") if o.strip()]
-
+public_api_url = os.getenv("NEXT_PUBLIC_API_URL", "")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["http://localhost:3000", "http://localhost:8000", public_api_url],
     allow_methods=["*"],
     allow_headers=["*"],
 )
