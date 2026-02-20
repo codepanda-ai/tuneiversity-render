@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { PracticeHeader } from "@/components/practice-header"
 import { LyricsDisplay } from "@/components/lyrics-display"
@@ -24,7 +24,7 @@ interface SongMeta {
   youtube_url: string | null
 }
 
-export default function PracticePage() {
+function PracticePageInner() {
   const searchParams = useSearchParams()
   const songId = Number(searchParams.get("song") ?? "1")
   const verseOrder = Number(searchParams.get("verse") ?? "1")
@@ -166,5 +166,13 @@ export default function PracticePage() {
         </Button>
       </div>
     </main>
+  )
+}
+
+export default function PracticePage() {
+  return (
+    <Suspense>
+      <PracticePageInner />
+    </Suspense>
   )
 }
