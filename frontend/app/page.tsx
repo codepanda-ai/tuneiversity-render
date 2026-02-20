@@ -8,6 +8,10 @@ import { AudioControls, type RecordingState } from "@/components/audio-controls"
 import { FeedbackSection } from "@/components/feedback-section"
 import { Button } from "@/components/ui/button"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
+import { SongLyrics } from "@/components/song-lyrics"
+import { SongReport } from "@/components/song-report"
+import { cachedFetch } from "@/lib/api-cache"
+import { Loader2 } from "lucide-react"
 
 interface VerseData {
   lyricsZh: string
@@ -37,6 +41,9 @@ function PracticePageInner() {
 
   const [recordingState, setRecordingState] = useState<RecordingState>("idle")
   const [feedback, setFeedback] = useState<{ score: number } | null>(null)
+  const [showLyrics, setShowLyrics] = useState(false)
+  const [verseScores, setVerseScores] = useState<number[]>([])
+  const [showReport, setShowReport] = useState(false)
 
   useEffect(() => {
     setIsLoading(true)
@@ -46,8 +53,8 @@ function PracticePageInner() {
     async function load() {
       try {
         const [songRes, verseRes] = await Promise.all([
-          fetch(`/api/songs/${songId}`),
-          fetch(`/api/songs/${songId}/verses/${verseOrder}`),
+          cachedFetch(`/api/songs/${songId}`),
+          cachedFetch(`/api/songs/${songId}/verses/${verseOrder}`),
         ])
         if (!songRes.ok || !verseRes.ok) throw new Error("Failed to load")
         const [song, verseData] = await Promise.all([songRes.json(), verseRes.json()])
@@ -67,9 +74,16 @@ function PracticePageInner() {
     load()
   }, [songId, verseOrder])
 
+  // Reset verse scores when the song changes
+  useEffect(() => {
+    setVerseScores([])
+    setShowReport(false)
+  }, [songId])
+
   const { startRecording, stopAndSubmit, error, clearError } = useAudioRecorder(
     (score) => {
       setFeedback({ score })
+      setVerseScores((prev) => [...prev, score])
     },
     (state) => setRecordingState(state)
   )
@@ -99,10 +113,28 @@ function PracticePageInner() {
     // Placeholder for native pronunciation playback
   }, [])
 
+  const isLastVerse = !!songMeta && verseOrder === songMeta.num_verses
+  const overallScore =
+    verseScores.length > 0
+      ? Math.round(verseScores.reduce((sum, s) => sum + s, 0) / verseScores.length)
+      : 0
+
+  const handleViewReport = useCallback(() => {
+    setShowReport(true)
+  }, [])
+
+  const handleRestartSong = useCallback(() => {
+    setShowReport(false)
+    setVerseScores([])
+    setFeedback(null)
+    router.push(`/?song=${songId}&verse=1`)
+  }, [router, songId])
+
   if (isLoading) {
     return (
       <main className="min-h-dvh flex flex-col bg-background max-w-lg mx-auto shadow-sm items-center justify-center">
         <p className="text-muted-foreground text-sm">Loading...</p>
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mt-3" />
       </main>
     )
   }
@@ -116,7 +148,7 @@ function PracticePageInner() {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col bg-background max-w-lg mx-auto shadow-sm">
+    <main className="min-h-dvh flex flex-col bg-background max-w-lg mx-auto shadow-sm relative">
       <PracticeHeader
         songTitleZh={songMeta.title_zh}
         songTitleEn={songMeta.title_en}
@@ -149,6 +181,8 @@ function PracticePageInner() {
           score={feedback.score}
           onTryAgain={handleTryAgain}
           onNextVerse={handleNextVerse}
+          isLastVerse={isLastVerse}
+          onViewReport={handleViewReport}
         />
       )}
 
@@ -168,10 +202,24 @@ function PracticePageInner() {
           variant="outline"
           className="w-full border-primary text-primary hover:bg-primary/5 font-medium"
           size="lg"
+          onClick={() => setShowLyrics(true)}
         >
-          Practice Full Verse
+          Full Song Lyrics
         </Button>
       </div>
+
+      {showLyrics && (
+        <SongLyrics songId={songId} onClose={() => setShowLyrics(false)} />
+      )}
+
+      {showReport && songMeta && (
+        <SongReport
+          songTitleZh={songMeta.title_zh}
+          artistZh={songMeta.artist_zh}
+          overallScore={overallScore}
+          onRestart={handleRestartSong}
+        />
+      )}
     </main>
   )
 }

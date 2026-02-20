@@ -1,13 +1,15 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { RotateCcw, ArrowRight } from "lucide-react"
+import { RotateCcw, ArrowRight, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface FeedbackSectionProps {
   score: number
   onTryAgain: () => void
   onNextVerse: () => void
+  isLastVerse?: boolean
+  onViewReport?: () => void
 }
 
 function getScoreColor(score: number) {
@@ -26,6 +28,8 @@ export function FeedbackSection({
   score,
   onTryAgain,
   onNextVerse,
+  isLastVerse = false,
+  onViewReport,
 }: FeedbackSectionProps) {
   const isLowScore = score < 70
 
@@ -57,14 +61,25 @@ export function FeedbackSection({
           <RotateCcw className="h-4 w-4" />
           Try Again
         </Button>
-        <Button
-          variant={isLowScore ? "outline" : "default"}
-          className={cn("flex-1 gap-2", !isLowScore && "font-semibold")}
-          onClick={onNextVerse}
-        >
-          Next Verse
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        {isLastVerse ? (
+          <Button
+            variant={isLowScore ? "outline" : "default"}
+            className={cn("flex-1 gap-2", !isLowScore && "font-semibold")}
+            onClick={onViewReport}
+          >
+            View Report
+            <FileText className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            variant={isLowScore ? "outline" : "default"}
+            className={cn("flex-1 gap-2", !isLowScore && "font-semibold")}
+            onClick={onNextVerse}
+          >
+            Next Verse
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   )

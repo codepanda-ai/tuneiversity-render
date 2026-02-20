@@ -35,6 +35,11 @@ def get_verse(verse_id: int, db: Session = Depends(get_db)) -> VerseResponse:
     return VerseService(db).get_verse_by_id(verse_id)
 
 
+@app.get("/api/songs/{song_id}/lyrics")
+def get_song_lyrics(song_id: int, db: Session = Depends(get_db)) -> list[VerseResponse]:
+    return VerseService(db).get_all_verses_by_song(song_id)
+
+
 @app.get("/api/songs/{song_id}/verses/{verse_order}")
 def get_verse_by_song_order(
     song_id: int, verse_order: int, db: Session = Depends(get_db)
