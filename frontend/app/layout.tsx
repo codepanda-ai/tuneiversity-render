@@ -11,7 +11,7 @@ const notoSansSC = Noto_Sans_SC({
 })
 
 export const metadata: Metadata = {
-  title: 'ToneCoach - AI Mandarin Pronunciation Tutor',
+  title: 'Tuneiversity - AI Mandarin Pronunciation Tutor',
   description:
     'Practice Mandarin pronunciation with Chinese song lyrics. AI-powered clarity scoring and feedback.',
 }

@@ -4,15 +4,10 @@ import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-interface Syllable {
-  character: string
-  pinyin: string
-  correct?: boolean
-}
-
 interface LyricsDisplayProps {
-  syllables: Syllable[]
-  translation: string
+  lyricsZh: string
+  lyricsPinyin: string
+  translation: string | null
   showFeedback: boolean
 }
 
@@ -33,49 +28,38 @@ function getTone(pinyin: string): string {
 }
 
 export function LyricsDisplay({
-  syllables,
+  lyricsZh,
+  lyricsPinyin,
   translation,
-  showFeedback,
 }: LyricsDisplayProps) {
   const [showTranslation, setShowTranslation] = useState(false)
+  const pinyinTokens = lyricsPinyin.split(" ")
 
   return (
     <section className="flex-1 flex flex-col items-center justify-center px-6 py-8">
       {/* Chinese Characters */}
-      <div className="flex flex-wrap justify-center gap-0.5">
-        {syllables.map((s, i) => (
-          <span
-            key={i}
-            className={cn(
-              "text-4xl md:text-5xl font-bold font-chinese transition-colors duration-300",
-              showFeedback && s.correct === false
-                ? "text-destructive bg-destructive/10 rounded-md px-1"
-                : "text-foreground"
-            )}
-          >
-            {s.character}
-          </span>
-        ))}
-      </div>
+      <p className="text-4xl md:text-5xl font-bold font-chinese text-center leading-tight">
+        {lyricsZh}
+      </p>
 
       {/* Pinyin */}
       <div className="flex flex-wrap justify-center gap-2 mt-4">
-        {syllables.map((s, i) => (
+        {pinyinTokens.map((token, i) => (
           <span
             key={i}
             className={cn(
               "text-base md:text-lg font-medium transition-colors",
-              toneColorMap[getTone(s.pinyin)]
+              toneColorMap[getTone(token)]
             )}
           >
-            {s.pinyin}
+            {token}
           </span>
         ))}
       </div>
 
       {/* Translation */}
       <div className="mt-5 flex flex-col items-center gap-2">
-        {showTranslation && (
+        {showTranslation && translation && (
           <p className="text-sm text-muted-foreground italic text-center">
             {`"${translation}"`}
           </p>

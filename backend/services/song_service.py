@@ -11,3 +11,7 @@ class SongService:
     def get_all_songs(self) -> list[SongResponse]:
         songs = self.db.query(Song).order_by(Song.id).all()
         return [SongResponse.model_validate(song) for song in songs]
+
+    def get_song_by_id(self, song_id: int) -> SongResponse:
+        song = self.db.query(Song).filter(Song.id == song_id).first()
+        return SongResponse.model_validate(song)

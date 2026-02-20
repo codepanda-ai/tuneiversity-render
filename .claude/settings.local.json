@@ -6,7 +6,10 @@
       "Bash(pnpm next:*)",
       "Bash(pnpm which:*)",
       "Bash(pnpm lint:*)",
-      "Bash(node --version:*)"
+      "Bash(node --version:*)",
+      "Bash(python3:*)",
+      "Bash(myenv/bin/python3:*)",
+      "Bash(source:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

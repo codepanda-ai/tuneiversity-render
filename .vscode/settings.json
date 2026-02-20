@@ -1,5 +1,7 @@
 {
   "files.watcherExclude": {
     "**/target": true
-  }
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/myenv/bin/python",
+  "python.analysis.extraPaths": ["${workspaceFolder}/backend"]
 }
