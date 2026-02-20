@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { PracticeHeader } from "@/components/practice-header"
 import { LyricsDisplay } from "@/components/lyrics-display"
 import { AudioControls, type RecordingState } from "@/components/audio-controls"
@@ -25,6 +25,7 @@ interface SongMeta {
 }
 
 function PracticePageInner() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const songId = Number(searchParams.get("song") ?? "1")
   const verseOrder = Number(searchParams.get("verse") ?? "1")
@@ -88,6 +89,12 @@ function PracticePageInner() {
     setFeedback(null)
   }, [])
 
+  const handleNextVerse = useCallback(() => {
+    if (!songMeta) return
+    const nextVerse = verseOrder < songMeta.num_verses ? verseOrder + 1 : 1
+    router.push(`/?song=${songId}&verse=${nextVerse}`)
+  }, [router, songId, verseOrder, songMeta])
+
   const handlePlayNative = useCallback(() => {
     // Placeholder for native pronunciation playback
   }, [])
@@ -141,7 +148,7 @@ function PracticePageInner() {
         <FeedbackSection
           score={feedback.score}
           onTryAgain={handleTryAgain}
-          onNextLine={handleTryAgain}
+          onNextVerse={handleNextVerse}
         />
       )}
 

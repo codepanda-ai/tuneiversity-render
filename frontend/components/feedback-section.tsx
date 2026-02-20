@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 interface FeedbackSectionProps {
   score: number
   onTryAgain: () => void
-  onNextLine: () => void
+  onNextVerse: () => void
 }
 
 function getScoreColor(score: number) {
@@ -25,7 +25,7 @@ function getScoreMessage(score: number) {
 export function FeedbackSection({
   score,
   onTryAgain,
-  onNextLine,
+  onNextVerse,
 }: FeedbackSectionProps) {
   const isLowScore = score < 70
 
@@ -60,9 +60,9 @@ export function FeedbackSection({
         <Button
           variant={isLowScore ? "outline" : "default"}
           className={cn("flex-1 gap-2", !isLowScore && "font-semibold")}
-          onClick={onNextLine}
+          onClick={onNextVerse}
         >
-          Next Line
+          Next Verse
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>

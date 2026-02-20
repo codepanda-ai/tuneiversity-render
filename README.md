@@ -7,7 +7,7 @@ Setup:
 2. `pnpm install`
 
 Run: `pnpm dev`
-
+Build: `pnpm build`
 Lint: `pnpm lint` or `pnpm eslint . --fix`
 
 Backend (FastAPI + Python)
@@ -19,7 +19,6 @@ Setup:
 4. `pip install -r requirements.txt`
 
 Run: `uvicorn main:app --reload --port 8000`
-
 Lint: `ruff check . --fix && ruff format .`
 
 Docker Deployment
