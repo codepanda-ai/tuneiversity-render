@@ -107,6 +107,13 @@ function PracticePageInner() {
     setFeedback(null)
   }, [])
 
+  const handlePreviousVerse = useCallback(() => {
+    if (!songMeta) return
+    const prevVerse = verseOrder > 1 ? verseOrder - 1 : songMeta.num_verses
+    const testSuffix = testParam !== null ? `&test=${testParam}` : ""
+    router.push(`/?song=${songId}&verse=${prevVerse}${testSuffix}`)
+  }, [router, songId, verseOrder, songMeta, testParam])
+
   const handleNextVerse = useCallback(() => {
     if (!songMeta) return
     const nextVerse = verseOrder < songMeta.num_verses ? verseOrder + 1 : 1
@@ -179,6 +186,8 @@ function PracticePageInner() {
           state={recordingState}
           onRecord={handleRecord}
           onPlayNative={handlePlayNative}
+          onPrevious={handlePreviousVerse}
+          onNext={handleNextVerse}
         />
       )}
 

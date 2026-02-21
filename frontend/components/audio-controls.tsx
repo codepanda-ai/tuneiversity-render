@@ -1,6 +1,6 @@
 "use client"
 
-import { Mic, Loader2 } from "lucide-react"
+import { Mic, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -10,6 +10,8 @@ interface AudioControlsProps {
   state: RecordingState
   onRecord: () => void
   onPlayNative: () => void
+  onPrevious: () => void
+  onNext: () => void
 }
 
 const waveformBars = [
@@ -57,6 +59,8 @@ export function AudioControls({
   state,
   onRecord,
   onPlayNative,
+  onPrevious,
+  onNext,
 }: AudioControlsProps) {
   return (
     <div className="flex flex-col items-center gap-4 px-6 pb-4">
@@ -117,6 +121,30 @@ export function AudioControls({
       {state === "recording" && (
         <p className="text-sm font-medium text-muted-foreground">Recording...</p>
       )}
+
+      {/* Previous / Next navigation */}
+      <div className="flex w-full justify-between mt-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onPrevious}
+          disabled={state !== "idle"}
+          className="gap-1.5"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onNext}
+          disabled={state !== "idle"}
+          className="gap-1.5"
+        >
+          Next
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   )
 }
