@@ -9,7 +9,9 @@
       "Bash(node --version:*)",
       "Bash(python3:*)",
       "Bash(myenv/bin/python3:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "WebFetch(domain:google.github.io)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -18,7 +18,10 @@ export interface UseAudioRecorderReturn {
 
 export function useAudioRecorder(
   onScoreReceived: (score: number) => void,
-  onStateChange: (state: RecordingState) => void
+  onStateChange: (state: RecordingState) => void,
+  testParam: string | null,
+  lyricsZh: string,
+  lyricsPinyin: string,
 ): UseAudioRecorderReturn {
   const [error, setError] = useState<AudioRecorderError | null>(null)
 
@@ -98,8 +101,15 @@ export function useAudioRecorder(
 
             const formData = new FormData()
             formData.append("audio", blob, "recording.webm")
+            formData.append("lyrics_zh", lyricsZh)
+            formData.append("lyrics_pinyin", lyricsPinyin)
 
-            const response = await fetch("/api/score", {
+            const scoreUrl =
+              testParam !== null
+                ? `/api/score?test=${testParam}`
+                : "/api/score"
+
+            const response = await fetch(scoreUrl, {
               method: "POST",
               body: formData,
             })
@@ -126,7 +136,7 @@ export function useAudioRecorder(
         mediaRecorder.stop()
       })
     },
-    [onScoreReceived, onStateChange]
+    [onScoreReceived, onStateChange, testParam, lyricsZh, lyricsPinyin]
   )
 
   return { startRecording, stopAndSubmit, error, clearError }

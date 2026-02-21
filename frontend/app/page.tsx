@@ -33,6 +33,7 @@ function PracticePageInner() {
   const searchParams = useSearchParams()
   const songId = Number(searchParams.get("song") ?? "1")
   const verseOrder = Number(searchParams.get("verse") ?? "1")
+  const testParam = searchParams.get("test")
 
   const [songMeta, setSongMeta] = useState<SongMeta | null>(null)
   const [verse, setVerse] = useState<VerseData | null>(null)
@@ -85,7 +86,10 @@ function PracticePageInner() {
       setFeedback({ score })
       setVerseScores((prev) => [...prev, score])
     },
-    (state) => setRecordingState(state)
+    (state) => setRecordingState(state),
+    testParam,
+    verse?.lyricsZh ?? "",
+    verse?.lyricsPinyin ?? "",
   )
 
   const handleRecord = useCallback(() => {
@@ -95,7 +99,7 @@ function PracticePageInner() {
       clearError()
       startRecording()
     } else if (recordingState === "recording") {
-      stopAndSubmit(1)
+      stopAndSubmit()
     }
   }, [recordingState, verse, startRecording, stopAndSubmit, clearError])
 
@@ -106,8 +110,9 @@ function PracticePageInner() {
   const handleNextVerse = useCallback(() => {
     if (!songMeta) return
     const nextVerse = verseOrder < songMeta.num_verses ? verseOrder + 1 : 1
-    router.push(`/?song=${songId}&verse=${nextVerse}`)
-  }, [router, songId, verseOrder, songMeta])
+    const testSuffix = testParam !== null ? `&test=${testParam}` : ""
+    router.push(`/?song=${songId}&verse=${nextVerse}${testSuffix}`)
+  }, [router, songId, verseOrder, songMeta, testParam])
 
   const handlePlayNative = useCallback(() => {
     // Placeholder for native pronunciation playback
@@ -127,8 +132,9 @@ function PracticePageInner() {
     setShowReport(false)
     setVerseScores([])
     setFeedback(null)
-    router.push(`/?song=${songId}&verse=1`)
-  }, [router, songId])
+    const testSuffix = testParam !== null ? `&test=${testParam}` : ""
+    router.push(`/?song=${songId}&verse=1${testSuffix}`)
+  }, [router, songId, testParam])
 
   if (isLoading) {
     return (

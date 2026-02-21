@@ -1,11 +1,14 @@
+import asyncio
 import random
+from typing import Optional
 
-from fastapi import Depends, FastAPI, File, UploadFile
+from fastapi import Depends, FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import get_db
 from schemas import SongResponse, VerseResponse
+from services.score_service import score_pronunciation
 from services.song_service import SongService
 from services.verse_service import VerseService
 
@@ -48,7 +51,23 @@ def get_verse_by_song_order(
 
 
 @app.post("/api/score")
-async def score_audio(audio: UploadFile = File(...)) -> dict[str, int]:
-    # Drain the upload to avoid uvicorn body warnings (mock — contents not used)
-    await audio.read()
-    return {"score": random.randint(0, 100)}
+async def score_audio(
+    audio: UploadFile = File(...),
+    lyrics_zh: str = Form(""),
+    lyrics_pinyin: str = Form(""),
+    test: Optional[bool] = None,
+) -> dict[str, int]:
+    audio_bytes = await audio.read()
+
+    if test is False:
+        print("Scoring audio with Gemini...")
+        mime_type = audio.content_type or "audio/webm"
+        score = await score_pronunciation(
+            audio_bytes, mime_type, lyrics_zh, lyrics_pinyin
+        )
+    else:
+        print("Generating random test score...")
+        await asyncio.sleep(3)
+        score = random.randint(0, 100)
+
+    return {"score": score}
