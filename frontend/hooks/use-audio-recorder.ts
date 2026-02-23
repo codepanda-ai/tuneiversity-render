@@ -22,6 +22,7 @@ export function useAudioRecorder(
   testParam: string | null,
   lyricsZh: string,
   lyricsPinyin: string,
+  sessionId: string,
 ): UseAudioRecorderReturn {
   const [error, setError] = useState<AudioRecorderError | null>(null)
 
@@ -104,10 +105,10 @@ export function useAudioRecorder(
             formData.append("lyrics_zh", lyricsZh)
             formData.append("lyrics_pinyin", lyricsPinyin)
 
-            const scoreUrl =
-              testParam !== null
-                ? `/api/score?test=${testParam}`
-                : "/api/score"
+            const urlParams = new URLSearchParams()
+            if (testParam !== null) urlParams.set("test", testParam)
+            urlParams.set("session", sessionId)
+            const scoreUrl = `/api/score?${urlParams.toString()}`
 
             const response = await fetch(scoreUrl, {
               method: "POST",
@@ -136,7 +137,7 @@ export function useAudioRecorder(
         mediaRecorder.stop()
       })
     },
-    [onScoreReceived, onStateChange, testParam, lyricsZh, lyricsPinyin]
+    [onScoreReceived, onStateChange, testParam, lyricsZh, lyricsPinyin, sessionId]
   )
 
   return { startRecording, stopAndSubmit, error, clearError }

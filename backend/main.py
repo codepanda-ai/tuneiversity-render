@@ -56,6 +56,7 @@ async def score_audio(
     lyrics_zh: str = Form(""),
     lyrics_pinyin: str = Form(""),
     test: Optional[bool] = None,
+    session: Optional[str] = None,
 ) -> dict[str, int]:
     audio_bytes = await audio.read()
 
@@ -63,7 +64,7 @@ async def score_audio(
         print("Scoring audio with Gemini...")
         mime_type = audio.content_type or "audio/webm"
         score = await score_pronunciation(
-            audio_bytes, mime_type, lyrics_zh, lyrics_pinyin
+            audio_bytes, mime_type, lyrics_zh, lyrics_pinyin, session
         )
     else:
         print("Generating random test score...")

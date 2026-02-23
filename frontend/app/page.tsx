@@ -35,6 +35,11 @@ function PracticePageInner() {
   const verseOrder = Number(searchParams.get("verse") ?? "1")
   const testParam = searchParams.get("test")
 
+  const sessionParam = searchParams.get("session")
+  const [sessionId, setSessionId] = useState<string>(
+    () => sessionParam ?? crypto.randomUUID()
+  )
+
   const [songMeta, setSongMeta] = useState<SongMeta | null>(null)
   const [verse, setVerse] = useState<VerseData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -81,6 +86,16 @@ function PracticePageInner() {
     setShowReport(false)
   }, [songId])
 
+  // Inject session ID into URL if not already present
+   
+  useEffect(() => {
+    if (!searchParams.get("session")) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("session", sessionId)
+      router.replace(`/?${params.toString()}`)
+    }
+  }, [router, sessionId, searchParams])
+
   const { startRecording, stopAndSubmit, error, clearError } = useAudioRecorder(
     (score) => {
       setFeedback({ score })
@@ -90,6 +105,7 @@ function PracticePageInner() {
     testParam,
     verse?.lyricsZh ?? "",
     verse?.lyricsPinyin ?? "",
+    sessionId,
   )
 
   const handleRecord = useCallback(() => {
@@ -104,22 +120,27 @@ function PracticePageInner() {
   }, [recordingState, verse, startRecording, stopAndSubmit, clearError])
 
   const handleTryAgain = useCallback(() => {
+    const newSessionId = crypto.randomUUID()
+    setSessionId(newSessionId)
     setFeedback(null)
-  }, [])
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("session", newSessionId)
+    router.replace(`/?${params.toString()}`)
+  }, [router, searchParams])
 
   const handlePreviousVerse = useCallback(() => {
     if (!songMeta) return
     const prevVerse = verseOrder > 1 ? verseOrder - 1 : songMeta.num_verses
     const testSuffix = testParam !== null ? `&test=${testParam}` : ""
-    router.push(`/?song=${songId}&verse=${prevVerse}${testSuffix}`)
-  }, [router, songId, verseOrder, songMeta, testParam])
+    router.push(`/?song=${songId}&verse=${prevVerse}${testSuffix}&session=${sessionId}`)
+  }, [router, songId, verseOrder, songMeta, testParam, sessionId])
 
   const handleNextVerse = useCallback(() => {
     if (!songMeta) return
     const nextVerse = verseOrder < songMeta.num_verses ? verseOrder + 1 : 1
     const testSuffix = testParam !== null ? `&test=${testParam}` : ""
-    router.push(`/?song=${songId}&verse=${nextVerse}${testSuffix}`)
-  }, [router, songId, verseOrder, songMeta, testParam])
+    router.push(`/?song=${songId}&verse=${nextVerse}${testSuffix}&session=${sessionId}`)
+  }, [router, songId, verseOrder, songMeta, testParam, sessionId])
 
   const handlePlayNative = useCallback(() => {
     // Placeholder for native pronunciation playback
@@ -140,8 +161,8 @@ function PracticePageInner() {
     setVerseScores([])
     setFeedback(null)
     const testSuffix = testParam !== null ? `&test=${testParam}` : ""
-    router.push(`/?song=${songId}&verse=1${testSuffix}`)
-  }, [router, songId, testParam])
+    router.push(`/?song=${songId}&verse=1${testSuffix}&session=${sessionId}`)
+  }, [router, songId, testParam, sessionId])
 
   if (isLoading) {
     return (
