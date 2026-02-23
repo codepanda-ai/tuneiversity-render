@@ -143,8 +143,23 @@ function PracticePageInner() {
   }, [router, songId, verseOrder, songMeta, testParam, sessionId])
 
   const handlePlayNative = useCallback(() => {
-    // Placeholder for native pronunciation playback
-  }, [])
+    if (!verse?.lyricsZh) return
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(verse.lyricsZh)
+    utterance.lang = "zh-CN"
+    utterance.rate = 0.5
+
+    const voices = window.speechSynthesis.getVoices()
+    const zhVoices = voices.filter((v) => v.lang.startsWith("zh"))
+    // Known female zh-CN voice names across macOS, Windows, and Chrome
+    const femaleNames = ["Tingting", "Meijia", "Yaoyao", "Huihui", "Google 普通话"]
+    const femaleVoice =
+      zhVoices.find((v) => femaleNames.some((name) => v.name.includes(name))) ??
+      zhVoices[0]
+    if (femaleVoice) utterance.voice = femaleVoice
+
+    window.speechSynthesis.speak(utterance)
+  }, [verse?.lyricsZh])
 
   const isLastVerse = !!songMeta && verseOrder === songMeta.num_verses
   const overallScore =
