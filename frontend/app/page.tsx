@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, Suspense } from "react"
+import { useState, useCallback, useEffect, useRef, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { PracticeHeader } from "@/components/practice-header"
 import { LyricsDisplay } from "@/components/lyrics-display"
@@ -44,6 +44,17 @@ function PracticePageInner() {
   const [verse, setVerse] = useState<VerseData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
+
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([])
+
+  useEffect(() => {
+    const loadVoices = () => {
+      voicesRef.current = window.speechSynthesis.getVoices()
+    }
+    loadVoices()
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices)
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices)
+  }, [])
 
   const [recordingState, setRecordingState] = useState<RecordingState>("idle")
   const [feedback, setFeedback] = useState<{ score: number } | null>(null)
@@ -148,16 +159,8 @@ function PracticePageInner() {
     const utterance = new SpeechSynthesisUtterance(verse.lyricsZh)
     utterance.lang = "zh-CN"
     utterance.rate = 0.5
-
-    const voices = window.speechSynthesis.getVoices()
-    const zhVoices = voices.filter((v) => v.lang.startsWith("zh"))
-    // Known female zh-CN voice names across macOS, Windows, and Chrome
-    const femaleNames = ["Tingting", "Meijia", "Yaoyao", "Huihui", "Google 普通话"]
-    const femaleVoice =
-      zhVoices.find((v) => femaleNames.some((name) => v.name.includes(name))) ??
-      zhVoices[0]
-    if (femaleVoice) utterance.voice = femaleVoice
-
+    const chineseVoice = voicesRef.current.find((v) => v.name.includes("Meijia"))
+    if (chineseVoice) utterance.voice = chineseVoice
     window.speechSynthesis.speak(utterance)
   }, [verse?.lyricsZh])
 
