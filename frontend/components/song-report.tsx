@@ -4,18 +4,24 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { RotateCcw, CheckCircle, AlertCircle, Share2 } from "lucide-react"
 
-interface SongReportProps {
-  songTitleZh: string
+interface SuggestedSong {
+  id: number
+  titleZh: string
+  titleEn: string
   artistZh: string
-  overallScore: number
-  onRestart: () => void
 }
 
-const SUGGESTED_SONGS = [
-  { titleZh: "月亮代表我的心", titleEn: "The Moon Represents My Heart", artistZh: "邓丽君" },
-  { titleZh: "告白气球", titleEn: "Love Confession", artistZh: "周杰伦" },
-  { titleZh: "晴天", titleEn: "Sunny Day", artistZh: "周杰伦" },
-]
+interface SongReportProps {
+  songTitleZh: string
+  songTitleEn: string
+  artistZh: string
+  artistEn: string
+  overallScore: number
+  positives: string[]
+  improvements: string[]
+  suggestedSongs: SuggestedSong[]
+  onRestart: () => void
+}
 
 function getLetterGrade(score: number): string {
   if (score >= 93) return "A+"
@@ -37,36 +43,30 @@ function getGradeColor(score: number): string {
   return "text-destructive"
 }
 
-function getFeedback(score: number): { positives: string[]; improvements: string[] } {
-  if (score >= 85) {
-    return {
-      positives: ["Strong tone accuracy throughout", "Clear pronunciation on most syllables"],
-      improvements: ["Refine rising tones (Tone 2)", "Work on syllable-final consonants"],
-    }
-  }
-  return {
-    positives: ["Good effort and persistence", "Some syllables pronounced correctly"],
-    improvements: [
-      "Start with slower practice songs",
-      "Review fundamental tone rules",
-      "Practice individual syllables before full lines",
-      "Listen to native pronunciation more frequently",
-    ],
-  }
-}
-
-export function SongReport({ songTitleZh, artistZh, overallScore, onRestart }: SongReportProps) {
+export function SongReport({
+  songTitleZh,
+  songTitleEn,
+  artistZh,
+  artistEn,
+  overallScore,
+  positives,
+  improvements,
+  suggestedSongs,
+  onRestart,
+}: SongReportProps) {
   const grade = getLetterGrade(overallScore)
   const gradeColor = getGradeColor(overallScore)
-  const { positives, improvements } = getFeedback(overallScore)
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background max-w-lg mx-auto overflow-y-auto">
       {/* Header */}
       <header className="px-6 pt-8 pb-4 text-center shrink-0">
         <h1 className="text-2xl font-bold text-foreground">Song Complete!</h1>
-        <p className="text-sm text-muted-foreground mt-1 font-chinese">
+        <p className="text-sm font-chinese text-foreground mt-1">
           {songTitleZh} · {artistZh}
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {songTitleEn} · {artistEn}
         </p>
       </header>
 
@@ -117,9 +117,9 @@ export function SongReport({ songTitleZh, artistZh, overallScore, onRestart }: S
         <div>
           <h2 className="font-bold text-foreground mb-3">Try These Songs Next</h2>
           <div className="flex flex-col gap-2">
-            {SUGGESTED_SONGS.map((song) => (
+            {suggestedSongs.map((song) => (
               <div
-                key={song.titleZh}
+                key={song.id}
                 className="rounded-xl border border-border bg-background px-4 py-3"
               >
                 <p className="font-bold text-foreground font-chinese">{song.titleZh}</p>

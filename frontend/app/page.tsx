@@ -9,7 +9,6 @@ import { FeedbackSection } from "@/components/feedback-section"
 import { Button } from "@/components/ui/button"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 import { SongLyrics } from "@/components/song-lyrics"
-import { SongReport } from "@/components/song-report"
 import { cachedFetch } from "@/lib/api-cache"
 import { Loader2 } from "lucide-react"
 
@@ -60,7 +59,7 @@ function PracticePageInner() {
   const [feedback, setFeedback] = useState<{ score: number } | null>(null)
   const [showLyrics, setShowLyrics] = useState(false)
   const [verseScores, setVerseScores] = useState<number[]>([])
-  const [showReport, setShowReport] = useState(false)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
 
   useEffect(() => {
     setIsLoading(true)
@@ -94,11 +93,9 @@ function PracticePageInner() {
   // Reset verse scores when the song changes
   useEffect(() => {
     setVerseScores([])
-    setShowReport(false)
   }, [songId])
 
   // Inject session ID into URL if not already present
-   
   useEffect(() => {
     if (!searchParams.get("session")) {
       const params = new URLSearchParams(searchParams.toString())
@@ -165,17 +162,18 @@ function PracticePageInner() {
   }, [verse?.lyricsZh])
 
   const isLastVerse = !!songMeta && verseOrder === songMeta.num_verses
-  const overallScore =
-    verseScores.length > 0
-      ? Math.round(verseScores.reduce((sum, s) => sum + s, 0) / verseScores.length)
-      : 0
 
-  const handleViewReport = useCallback(() => {
-    setShowReport(true)
-  }, [])
+  const handleViewReport = useCallback(async () => {
+    setIsGeneratingReport(true)
+    try {
+      await fetch(`/api/songs/${songId}/report?session=${sessionId}`, { method: "POST" })
+      router.push(`/report?session=${sessionId}&song=${songId}`)
+    } catch {
+      setIsGeneratingReport(false)
+    }
+  }, [songId, sessionId, router])
 
   const handleRestartSong = useCallback(() => {
-    setShowReport(false)
     setVerseScores([])
     setFeedback(null)
     const testSuffix = testParam !== null ? `&test=${testParam}` : ""
@@ -230,7 +228,12 @@ function PracticePageInner() {
         />
       )}
 
-      {feedback && (
+      {isGeneratingReport ? (
+        <div className="flex flex-col items-center gap-3 px-6 py-10">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Generating your report…</p>
+        </div>
+      ) : feedback ? (
         <FeedbackSection
           score={feedback.score}
           onTryAgain={handleTryAgain}
@@ -238,7 +241,7 @@ function PracticePageInner() {
           isLastVerse={isLastVerse}
           onViewReport={handleViewReport}
         />
-      )}
+      ) : null}
 
       {error && (
         <p className="text-sm text-destructive text-center px-6 pb-2">
@@ -264,15 +267,6 @@ function PracticePageInner() {
 
       {showLyrics && (
         <SongLyrics songId={songId} onClose={() => setShowLyrics(false)} />
-      )}
-
-      {showReport && songMeta && (
-        <SongReport
-          songTitleZh={songMeta.title_zh}
-          artistZh={songMeta.artist_zh}
-          overallScore={overallScore}
-          onRestart={handleRestartSong}
-        />
       )}
     </main>
   )

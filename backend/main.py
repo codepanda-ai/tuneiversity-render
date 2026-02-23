@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import get_db
-from schemas import SongResponse, VerseResponse
+from schemas import ReportResponse, SongResponse, VerseResponse
+from services.report_service import ReportService
 from services.score_service import score_pronunciation
 from services.song_service import SongService
 from services.verse_service import VerseService
@@ -48,6 +49,16 @@ def get_verse_by_song_order(
     song_id: int, verse_order: int, db: Session = Depends(get_db)
 ) -> VerseResponse:
     return VerseService(db).get_verse_by_song_order(song_id, verse_order)
+
+
+@app.post("/api/songs/{song_id}/report", response_model=ReportResponse)
+def generate_report(song_id: int, session: str) -> ReportResponse:
+    return ReportService().get_report(song_id, session)
+
+
+@app.get("/api/songs/{song_id}/report", response_model=ReportResponse)
+def get_report(song_id: int, session: str) -> ReportResponse:
+    return ReportService().get_report(song_id, session)
 
 
 @app.post("/api/score")

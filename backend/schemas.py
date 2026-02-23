@@ -1,6 +1,22 @@
 from pydantic import BaseModel, ConfigDict
 
 
+class SuggestedSong(BaseModel):
+    id: int
+    title_zh: str
+    title_en: str
+    artist_zh: str
+
+
+class ReportResponse(BaseModel):
+    song_id: int
+    session_id: str
+    overall_score: int
+    positives: list[str]
+    improvements: list[str]
+    suggested_songs: list[SuggestedSong]
+
+
 class SongResponse(BaseModel):
     id: int
     title_zh: str
