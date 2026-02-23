@@ -90,7 +90,7 @@ function ReportPageInner() {
         titleEn: s.title_en,
         artistZh: s.artist_zh,
       }))}
-      onRestart={() => router.push(`/?song=${songId}`)}
+      onRestart={() => router.push(`/practice?song=${songId}`)}
     />
   )
 }
