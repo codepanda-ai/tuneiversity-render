@@ -1,9 +1,11 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Music2, UserRound, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { cachedFetch } from "@/lib/api-cache"
 
 interface Song {
   id: number
@@ -13,6 +15,17 @@ interface Song {
   artist_zh: string
   difficulty: "beginner" | "intermediate" | "advanced"
   youtube_url: string
+}
+
+interface ApiSong {
+  id: number
+  title_en: string
+  title_zh: string
+  artist_en: string
+  artist_zh: string
+  difficulty: string | null
+  num_verses: number
+  youtube_url: string | null
 }
 
 const MOCK_SONGS: Song[] = [
@@ -81,6 +94,36 @@ function getYouTubeThumbnail(url: string): string | null {
 }
 
 export default function HomePage() {
+  const [apiSongs, setApiSongs] = useState<Song[]>([])
+
+  useEffect(() => {
+    async function fetchSongs() {
+      try {
+        const res = await cachedFetch("/api/songs")
+        if (res.ok) {
+          const data: ApiSong[] = await res.json()
+          setApiSongs(
+            data.map((s) => ({
+              id: s.id,
+              title_en: s.title_en,
+              title_zh: s.title_zh,
+              artist_en: s.artist_en,
+              artist_zh: s.artist_zh,
+              difficulty: (s.difficulty ?? "beginner") as Song["difficulty"],
+              youtube_url: s.youtube_url ?? "",
+            }))
+          )
+        }
+      } catch {
+        // silent — fall back to mock data only
+      }
+    }
+    fetchSongs()
+  }, [])
+
+  const apiIds = new Set(apiSongs.map((s) => s.id))
+  const songs = [...apiSongs, ...MOCK_SONGS.filter((s) => !apiIds.has(s.id))]
+
   return (
     <main className="min-h-dvh flex flex-col bg-background max-w-lg mx-auto shadow-sm">
       {/* Header */}
@@ -106,10 +149,13 @@ export default function HomePage() {
 
       {/* Song list */}
       <div className="flex-1 px-4 py-4 space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
-          Songs
-        </h2>
-        {MOCK_SONGS.map((song) => {
+        <div className="px-1 mb-1">
+          <h2 className="text-xl font-bold text-foreground">Choose a Song</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Select a song to practice your Mandarin pronunciation
+          </p>
+        </div>
+        {songs.map((song) => {
           const thumbnail = getYouTubeThumbnail(song.youtube_url)
           return (
             <Link

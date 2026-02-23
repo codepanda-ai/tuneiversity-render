@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 import { SongLyrics } from "@/components/song-lyrics"
 import { cachedFetch } from "@/lib/api-cache"
-import { Loader2 } from "lucide-react"
+import { Loader2, House, ScrollText } from "lucide-react"
 
 interface VerseData {
   lyricsZh: string
@@ -59,7 +59,6 @@ function PracticePageInner() {
   const [recordingState, setRecordingState] = useState<RecordingState>("idle")
   const [feedback, setFeedback] = useState<{ score: number } | null>(null)
   const [showLyrics, setShowLyrics] = useState(false)
-  const [verseScores, setVerseScores] = useState<number[]>([])
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
 
   useEffect(() => {
@@ -91,11 +90,6 @@ function PracticePageInner() {
     load()
   }, [songId, verseOrder])
 
-  // Reset verse scores when the song changes
-  useEffect(() => {
-    setVerseScores([])
-  }, [songId])
-
   // Inject session ID into URL if not already present
   useEffect(() => {
     if (!searchParams.get("session")) {
@@ -108,7 +102,6 @@ function PracticePageInner() {
   const { startRecording, stopAndSubmit, error, clearError } = useAudioRecorder(
     (score) => {
       setFeedback({ score })
-      setVerseScores((prev) => [...prev, score])
     },
     (state) => setRecordingState(state),
     testParam,
@@ -173,13 +166,6 @@ function PracticePageInner() {
       setIsGeneratingReport(false)
     }
   }, [songId, sessionId, router])
-
-  const handleRestartSong = useCallback(() => {
-    setVerseScores([])
-    setFeedback(null)
-    const testSuffix = testParam !== null ? `&test=${testParam}` : ""
-    router.push(`/practice?song=${songId}&verse=1${testSuffix}&session=${sessionId}`)
-  }, [router, songId, testParam, sessionId])
 
   if (isLoading) {
     return (
@@ -262,6 +248,7 @@ function PracticePageInner() {
           size="lg"
           onClick={() => setShowLyrics(true)}
         >
+          <ScrollText className="h-4 w-4" />
           Full Song Lyrics
         </Button>
         <Link href="/" className="block mt-2">
@@ -270,6 +257,7 @@ function PracticePageInner() {
             className="w-full text-muted-foreground"
             size="lg"
           >
+            <House className="h-4 w-4" />
             Home
           </Button>
         </Link>
